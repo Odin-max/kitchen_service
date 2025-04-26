@@ -1,0 +1,31 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator
+from django.urls import reverse
+
+
+class Cook(AbstractUser):
+    years_of_experience = models.IntegerField(MaxValueValidator(100))
+
+    class Meta:
+        verbose_name = "cook"
+        verbose_name_plural = "cooks"
+
+    def __str__(self):
+        return f"{self.username} ({self.first_name} {self.last_login})"
+    def get_absolute_url(self):
+        return reverse("", kwargs={"pk": self.pk})
+
+class Dish_type(models.Model):
+    name = models.CharField(max_length=255, blank=False, null=False)
+
+class Ingredient(models.Model):
+    name = models.CharField(max_length=255)
+
+class Dish(models.Model):
+    name = models.CharField(max_length=255, null=False, blank=False)
+    description = models.TextField(null= True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    dish_type = models.ForeignKey(Dish_type, on_delete=models.CASCADE)
+    ingredients = models.ManyToManyField(Ingredient, related_name="dishes")
+    cooks = models.ManyToManyField(Cook, related_name="dishes")
