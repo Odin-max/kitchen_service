@@ -5,7 +5,7 @@ from django.urls import reverse
 
 
 class Cook(AbstractUser):
-    years_of_experience = models.IntegerField(MaxValueValidator(100))
+    years_of_experience = models.IntegerField(MaxValueValidator(100), null=True)
 
     class Meta:
         verbose_name = "cook"
