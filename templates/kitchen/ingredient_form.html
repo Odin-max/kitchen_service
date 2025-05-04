@@ -1,0 +1,33 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ view.object.pk|yesno:"Update Ingredient,Create New Ingredient" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-7">
+  <h2 class="mb-4 text-center">{{ view.object.pk|yesno:"Update Ingredient,Create New Ingredient" }}</h2>
+
+  <div class="d-flex justify-content-end mb-4">
+    <a href="{% url 'kitchen:ingredient-list' %}" class="btn btn-outline-secondary rounded-pill px-4">
+      <i class="fas fa-arrow-left me-1"></i> Back to List
+    </a>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="card p-4 shadow rounded-4 mx-auto" style="max-width: 700px;">
+      {% for field in form %}
+        <div class="mb-3">
+          {% if field.label %}
+            <label class="form-label">{{ field.label }}</label>
+          {% endif %}
+          {{ field.errors }}
+          {{ field }}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-success w-100 rounded-pill">
+        {{ view.object.pk|yesno:"Update,Create" }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

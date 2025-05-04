@@ -1,0 +1,119 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Cooks{% endblock %}
+
+{% block content %}
+<div class="container mt-7">
+  <h2 class="mb-4">Search Cooks</h2>
+
+  <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+    <form method="get" action="" class="d-flex" style="max-width: 500px;">
+      <input
+        type="text"
+        name="username"
+        value="{{ search_form.username.value|default:'' }}"
+        placeholder="Search by username"
+        class="form-control rounded-pill me-2"
+        style="padding: 0.75rem 1rem;"
+      >
+      <button type="submit" class="btn btn-outline-primary rounded-pill px-4">Search</button>
+    </form>
+
+    {% if user.is_superuser %}
+      <a href="{% url 'kitchen:cook-create' %}" class="btn btn-success rounded-pill px-4">
+        <i class="fas fa-plus me-1"></i> Add Cook
+      </a>
+    {% endif %}
+  </div>
+
+  {% if cooks_list %}
+    <div class="table-responsive">
+      <table class="table table-hover bg-white shadow rounded-4 overflow-hidden">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Dishes</th>
+            {% if user.is_superuser %}
+              <th>Actions</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for cook in cooks_list %}
+          <tr>
+            <td>{{ cook.username }}</td>
+            <td>
+              {% for dish in cook.dishes.all %}
+                {{ dish.name }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+                No dishes
+              {% endfor %}
+            </td>
+            {% if user.is_superuser %}
+              <td>
+                <div class="d-flex gap-2">
+                  {% if not cook.is_superuser %}
+                    <a href="{% url 'kitchen:cook-update' cook.id %}" class="text-primary" title="Edit">
+                      <i class="fas fa-pen"></i>
+                    </a>
+                    <a href="{% url 'kitchen:cook-delete' cook.id %}" class="text-danger" title="Delete">
+                      <i class="fas fa-trash-alt"></i>
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <nav>
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.username %}&username={{ request.GET.username }}{% endif %}">Prev</a>
+            </li>
+          {% endif %}
+
+          {% with total_pages=paginator.num_pages current=page_obj.number %}
+            {% if total_pages > 7 and current > 4 %}
+              <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.username %}&username={{ request.GET.username }}{% endif %}">1</a></li>
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %}
+              {% if total_pages <= 7 or i >= current|add:"-3" and i <= current|add:"3" %}
+                {% if i == current %}
+                  <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}{% if request.GET.username %}&username={{ request.GET.username }}{% endif %}">{{ i }}</a>
+                  </li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {% if total_pages > 7 and current < total_pages|add:"-3" %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ total_pages }}{% if request.GET.username %}&username={{ request.GET.username }}{% endif %}">{{ total_pages }}</a>
+              </li>
+            {% endif %}
+          {% endwith %}
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.username %}&username={{ request.GET.username }}{% endif %}">Next</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  {% else %}
+    <p>No cooks found.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Dishes{% endblock %}
+
+{% block content %}
+<div class="container mt-7">
+  <h2 class="mb-4 text-center">Search Dishes</h2>
+
+  <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+    <form method="get" action="" class="d-flex" style="max-width: 500px;">
+      <input
+        type="text"
+        name="name"
+        value="{{ request.GET.name|default:'' }}"
+        placeholder="Search by dish name"
+        class="form-control rounded-pill me-2"
+        style="padding: 0.75rem 1rem;"
+      >
+      <button type="submit" class="btn btn-outline-primary rounded-pill px-4">Search</button>
+    </form>
+
+    {% if user.is_superuser %}
+      <a href="{% url 'kitchen:dish-create' %}" class="btn btn-success rounded-pill px-4">
+        <i class="fas fa-plus me-1"></i> Add Dish
+      </a>
+    {% endif %}
+  </div>
+
+  {% if dish_list %}
+    <div class="table-responsive">
+      <table class="table table-hover bg-white shadow rounded-4 overflow-hidden">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Ingredients</th>
+            <th>Cooks</th>
+            {% if user.is_superuser %}
+              <th>Actions</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for dish in dish_list %}
+          <tr>
+            <td>{{ dish.name }}</td>
+            <td>{{ dish.dish_type.name }}</td>
+            <td>${{ dish.price }}</td>
+            <td>
+              {% for ing in dish.ingredients.all %}
+                {{ ing.name }}{% if not forloop.last %}, {% endif %}
+              {% empty %}No ingredients{% endfor %}
+            </td>
+            <td>
+                {% if dish.cooks.count %}
+                    {% if user in dish.cooks.all %}
+                        <form method="post" action="{% url 'kitchen:dish-assign-toggle' dish.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button class="btn btn-warning btn-sm rounded-pill px-3 py-1" type="submit">
+                            Unassign me
+                        </button>
+                        </form>
+                    {% endif %}
+                    {% for cook in dish.cooks.all %}
+                        {{ cook.username }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                  {% if not user.is_superuser %}
+                    <form method="post" action="{% url 'kitchen:dish-assign-toggle' dish.id %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                      <button class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1" type="submit">
+                        Assign me
+                      </button>
+                    </form>
+                  {% else %}
+                    No cooks
+                  {% endif %}
+                {% endif %}
+              </td>              
+            {% if user.is_superuser %}
+              <td>
+                <div class="d-flex gap-2">
+                  <a href="{% url 'kitchen:dish-update' dish.id %}" class="text-primary" title="Edit">
+                    <i class="fas fa-pen"></i>
+                  </a>
+                  <a href="{% url 'kitchen:dish-delete' dish.id %}" class="text-danger" title="Delete">
+                    <i class="fas fa-trash-alt"></i>
+                  </a>
+                </div>
+              </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      {% with total_pages=paginator.num_pages current=page_obj.number %}
+        <nav>
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.name %}&name={{ request.GET.name|default:'' }}{% endif %}">Prev</a>
+              </li>
+            {% endif %}
+
+            {% if total_pages > 7 and current > 4 %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.name %}&name={{ request.GET.name|default:'' }}{% endif %}">1</a>
+              </li>
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %}
+              {% if total_pages <= 7 or i >= current|add:-3 and i <= current|add:3 %}
+                {% if i == current %}
+                  <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                  <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.name %}&name={{ request.GET.name|default:'' }}{% endif %}">{{ i }}</a></li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {% if total_pages > 7 and current < total_pages|add:-3 %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ total_pages }}{% if request.GET.name %}&name={{ request.GET.name|default:'' }}{% endif %}">{{ total_pages }}</a>
+              </li>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.name %}&name={{ request.GET.name|default:'' }}{% endif %}">Next</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endwith %}
+    {% endif %}
+
+  {% else %}
+    <p>No dishes found.</p>
+  {% endif %}
+</div>
+{% endblock %}

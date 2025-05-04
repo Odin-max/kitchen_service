@@ -1,0 +1,75 @@
+{% load static %}
+
+  <div class="container position-sticky z-index-sticky top-0">
+    <div class="row">
+      <div class="col-12">
+        <nav class="navbar navbar-expand-lg  blur blur-rounded top-0 z-index-fixed shadow position-absolute my-3 py-2 start-0 end-0 mx-4">
+          <div class="container-fluid">
+            <a class="navbar-brand font-weight-bolder ms-sm-3" 
+               href="/" rel="tooltip" title="Designed and Coded by Creative Tim" data-placement="bottom">
+               Restourant Kitchen Service
+            </a>
+            <button class="navbar-toggler shadow-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon mt-2">
+                <span class="navbar-toggler-bar bar1"></span>
+                <span class="navbar-toggler-bar bar2"></span>
+                <span class="navbar-toggler-bar bar3"></span>
+              </span>
+            </button>
+            <div class="collapse navbar-collapse pt-3 pb-2 py-lg-0" id="navigation">
+              <ul class="navbar-nav navbar-nav-hover ms-lg-12 ps-lg-5 w-100 gap-2 fs-6">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="dishesDropdown" data-bs-toggle="dropdown">Dishes</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'kitchen:dish-list' %}">All Dishes</a></li>
+                    <li><a class="dropdown-item" href="{% url 'kitchen:dish-create' %}">Create Dish</a></li>
+                  </ul>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="dishTypesDropdown" data-bs-toggle="dropdown">Dish Types</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'kitchen:dish-type-list' %}">All Dish Types</a></li>
+                    <li><a class="dropdown-item" href="{% url 'kitchen:dish-type-create' %}">Create Dish Type</a></li>
+                  </ul>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="ingredientsDropdown" data-bs-toggle="dropdown">Ingredients</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'kitchen:ingredient-list' %}">All Ingredients</a></li>
+                    <li><a class="dropdown-item" href="{% url 'kitchen:ingredient-create' %}">Create Ingredient</a></li>
+                  </ul>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="cooksDropdown" data-bs-toggle="dropdown">Cooks</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'kitchen:cook-list' %}">All Cooks</a></li>
+                    <li><a class="dropdown-item" href="{% url 'kitchen:cook-create' %}">Create Cook</a></li>
+                  </ul>
+                </li>  
+                <li class="nav-item ms-lg-auto">
+                  <a class="nav-link nav-link-icon me-2" href="{% url 'kitchen:logout' %}">
+                    <i class="fa fa-sign-out me-1"></i>
+                    <p class="d-inline text-sm z-index-1 font-weight-bold" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Logout">Logout</p>
+                  </a>
+                </li>
+                {% if user.is_authenticated %}
+                  <li class="nav-item my-auto ms-3 ms-lg-0">
+                    <div class="text-center text-white ms-3">
+                      <div style="color: #4682B4" class="fw-bold text-uppercase">
+                        {{ user.username }}
+                      </div>
+                      <small class="text-muted">
+                        {% if user.is_superuser %}admin{% else %}common user{% endif %}
+                      </small>
+                    </div>
+                  </li>
+                {% endif %}
+
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <!-- End Navbar -->
+      </div>
+    </div>
+  </div>

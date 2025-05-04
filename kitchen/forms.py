@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.core.validators import MaxValueValidator
 
 from .models import (
     Cook,
@@ -7,6 +8,80 @@ from .models import (
     Ingredient,
     Dish
 )
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Username",
+                "class": "form-control"
+            }
+        ))
+    password = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "placeholder": "Password",
+                "class": "form-control"
+            }
+        ))
+
+
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from .models import Cook
+
+
+class SignUpForm(UserCreationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(
+            attrs={"placeholder": "Username", "class": "form-control"}
+        )
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={"placeholder": "Email", "class": "form-control"}
+        )
+    )
+    first_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={"placeholder": "First name", "class": "form-control"}
+        )
+    )
+    last_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={"placeholder": "Last name", "class": "form-control"}
+        )
+    )
+    years_of_experience = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={"placeholder": "Years of experience", "class": "form-control"}
+        )
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={"placeholder": "Password", "class": "form-control"}
+        )
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={"placeholder": "Password check", "class": "form-control"}
+        )
+    )
+
+    class Meta:
+        model = Cook
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "years_of_experience",
+            "password1",
+            "password2",
+        )
 
 
 class GenericSearchForm(forms.Form):
@@ -45,6 +120,11 @@ class DishSearchForm(GenericSearchForm):
 
 
 class CookCreationForm(UserCreationForm):
+    years_of_experience = forms.IntegerField(
+        validators=[MaxValueValidator(100)],
+        required=True
+    )
+
     class Meta(UserCreationForm.Meta):
         model = Cook
         fields = UserCreationForm.Meta.fields + (
@@ -54,6 +134,23 @@ class CookCreationForm(UserCreationForm):
             "last_name",
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        placeholders = {
+            "username": "Username",
+            "email": "Email address",
+            "first_name": "First name",
+            "last_name": "Last name",
+            "password1": "Password",
+            "password2": "Password confirmation",
+            "years_of_experience": "Years of experience",
+        }
+
+        for field_name, field in self.fields.items():
+            field.widget.attrs["placeholder"] = placeholders.get(field_name, "")
+            field.label = ""
+
 class CookUpdateForm(forms.ModelForm):
     class Meta:
         model = Cook
@@ -61,17 +158,18 @@ class CookUpdateForm(forms.ModelForm):
 
 
 class DishForm(forms.ModelForm):
-    cooks = forms.ModelMultipleChoiceField(
-        queryset=Cook.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False,
-    )
-    ingredients = forms.ModelMultipleChoiceField(
-        queryset=Ingredient.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False,
-    )
-
     class Meta:
         model = Dish
         fields = "__all__"
+        widgets = {
+            "ingredients": forms.SelectMultiple(attrs={"class": "select2 form-control"}),
+            "cooks": forms.SelectMultiple(attrs={"class": "select2 form-control"}),
+            "dish_type": forms.Select(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 1,
+                "placeholder": "Enter description...",
+            }),
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "price": forms.NumberInput(attrs={"class": "form-control"}),
+        }
