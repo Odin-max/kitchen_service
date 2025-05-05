@@ -56,7 +56,9 @@
                   <li class="nav-item my-auto ms-3 ms-lg-0">
                     <div class="text-center text-white ms-3">
                       <div style="color: #4682B4" class="fw-bold text-uppercase">
-                        {{ user.username }}
+                        <a href="{% url 'kitchen:cook-detail' user.id %}" class="fw-bold text-uppercase text-decoration-none" style="color: #4682B4">
+                          {{ user.username }}
+                        </a>
                       </div>
                       <small class="text-muted">
                         {% if user.is_superuser %}admin{% else %}common user{% endif %}

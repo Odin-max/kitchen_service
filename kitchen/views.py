@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
-from django.views import generic
+from django.views import generic, View
 from django.urls import reverse_lazy,reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
@@ -146,21 +146,21 @@ class DishTypeListView(LoginRequiredMixin, GenericSearchListView):
     search_form_class = DishTypeSearchForm
 
 
-class DishTypeCreateView(LoginRequiredMixin, generic.CreateView):
+class DishTypeCreateView(LoginRequiredMixin, SuperuserRequiredMixin, generic.CreateView):
    model = Dish_type
    fields = "__all__"
-   success_url = reverse_lazy("")
+   success_url = reverse_lazy("kitchen:dish-type-list")
 
 
-class DishTypeUpdateView(LoginRequiredMixin, generic.UpdateView):
+class DishTypeUpdateView(LoginRequiredMixin, SuperuserRequiredMixin, generic.UpdateView):
    model = Dish_type
    fields = "__all__"
-   success_url = reverse_lazy("")
+   success_url = reverse_lazy("kitchen:dish-type-list")
 
 
-class DishTypeDeleteView(LoginRequiredMixin, generic.DeleteView):
+class DishTypeDeleteView(LoginRequiredMixin, SuperuserRequiredMixin, generic.DeleteView):
    model = Dish_type
-   success_url = reverse_lazy("")
+   success_url = reverse_lazy("kitchen:dish-type-list")
 
 
 class CookListView(LoginRequiredMixin, GenericSearchListView):
@@ -173,12 +173,23 @@ class CookListView(LoginRequiredMixin, GenericSearchListView):
     search_form_class = CookSearchForm
 
     
-class CookDetailView(LoginRequiredMixin, generic.DetailView):
-    model = Cook
-    queryset = Cook.objects.all().prefetch_related("dishes")
+class CookDetailView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        cook = get_object_or_404(Cook.objects.prefetch_related("dishes"), pk=pk)
+        form = CookUpdateForm(instance=cook) if request.user == cook else None
+        return render(request, "kitchen/cook_detail.html", {"cook": cook, "form": form})
+
+    def post(self, request, pk):
+        cook = get_object_or_404(Cook.objects.prefetch_related("dishes"), pk=pk)
+        if request.user != cook:
+            return redirect("kitchen:cook-detail", pk=cook.pk)
+        form = CookUpdateForm(request.POST, instance=cook)
+        if form.is_valid():
+            form.save()
+        return redirect("kitchen:cook-detail", pk=cook.pk)
 
 
-class CookCreateView(LoginRequiredMixin, generic.CreateView):
+class CookCreateView(LoginRequiredMixin,SuperuserRequiredMixin, generic.CreateView):
     model = Cook
     form_class = CookCreationForm
     template_name = "kitchen/cook_form.html"
@@ -241,13 +252,16 @@ class DishDeleteView(LoginRequiredMixin,SuperuserRequiredMixin, generic.DeleteVi
 
 @login_required
 def toggle_assign_to_dish(request, pk):
-    cook = get_object_or_404(Cook, id=request.user.id)
-    dish = get_object_or_404(Dish, id=pk)
+    cook = Cook.objects.get(id=request.user.id)
+    dish = Dish.objects.get(id=pk)
 
     if dish in cook.dishes.all():
         cook.dishes.remove(dish)
     else:
         cook.dishes.add(dish)
 
-    next_url = request.POST.get("next") or reverse("kitchen:dish-list")
-    return redirect(next_url)
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+
+    return redirect("kitchen:dish-list")

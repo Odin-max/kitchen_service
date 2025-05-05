@@ -41,7 +41,7 @@
         <tbody>
           {% for cook in cooks_list %}
           <tr>
-            <td>{{ cook.username }}</td>
+            <td><a href="{% url 'kitchen:cook-detail' cook.id %}" class="text-decoration-none">{{ cook.username }}</a></td>
             <td>
               {% for dish in cook.dishes.all %}
                 {{ dish.name }}{% if not forloop.last %}, {% endif %}

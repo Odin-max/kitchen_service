@@ -1,0 +1,91 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ cook.username|title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-7">
+  <h2 class="mb-4 text-center">{{ cook.username|upper }}</h2>
+
+  <div class="card p-4 shadow border-0 mx-auto" style="max-width: 600px;">
+    {% if user == cook %}
+    <form method="post" id="profile-form">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="mb-3">
+        {{ form.username.label_tag }} {{ form.username }}
+        {{ form.username.errors }}
+      </div>      
+
+      <div class="mb-3">
+        {{ form.first_name.label_tag }} {{ form.first_name }}
+        {{ form.first_name.errors }}
+      </div>
+      <div class="mb-3">
+        {{ form.last_name.label_tag }} {{ form.last_name }}
+        {{ form.last_name.errors }}
+      </div>
+      <div class="mb-3">
+        {{ form.email.label_tag }} {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+      <div class="mb-3">
+        {{ form.years_of_experience.label_tag }} {{ form.years_of_experience }}
+        {{ form.years_of_experience.errors }}
+      </div>
+
+      <button type="submit" id="save-btn" class="btn btn-success rounded-pill" disabled>Save changes</button>
+    </form>
+    {% else %}
+      <p><strong>Username:</strong> {{ cook.username }}</p>
+      <p><strong>Email:</strong> {{ cook.email }}</p>
+      <p><strong>First name:</strong> {{ cook.first_name }}</p>
+      <p><strong>Last name:</strong> {{ cook.last_name }}</p>
+      <p><strong>Years of Experience:</strong> {{ cook.years_of_experience }}</p>
+    {% endif %}
+
+    <hr>
+    <h5>Dishes:</h5>
+    <ul class="list-group">
+      {% for dish in cook.dishes.all %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ dish.name }}
+          {% if user == cook %}
+            <form method="post" action="{% url 'kitchen:dish-assign-toggle' dish.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Unassign</button>
+            </form>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="list-group-item">No dishes assigned</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script>
+  const form = document.getElementById("profile-form");
+  const saveBtn = document.getElementById("save-btn");
+
+  if (form) {
+    const initialData = new FormData(form);
+
+    form.addEventListener("input", () => {
+      const currentData = new FormData(form);
+      let changed = false;
+
+      for (let key of initialData.keys()) {
+        if (initialData.get(key) !== currentData.get(key)) {
+          changed = true;
+          break;
+        }
+      }
+
+      saveBtn.disabled = !changed;
+    });
+  }
+</script>
+{% endblock %}
