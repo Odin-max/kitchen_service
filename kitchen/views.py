@@ -30,7 +30,7 @@ from .forms import (
 @login_required
 def index(request):
     """View function for the home page of the site."""
-
+    num_ingredients = Ingredient.objects.count()
     num_cooks = Cook.objects.count()
     num_dishes = Dish.objects.count()
     num_dish_types = Dish_type.objects.count()
@@ -39,6 +39,7 @@ def index(request):
     request.session["num_visits"] = num_visits + 1
 
     context = {
+        "num_ingredients": num_ingredients,
         "num_cooks": num_cooks,
         "num_dishes": num_dishes,
         "num_dish_types": num_dish_types,
@@ -145,6 +146,11 @@ class DishTypeListView(LoginRequiredMixin, GenericSearchListView):
     paginate_by = 5
     search_form_class = DishTypeSearchForm
 
+class DishTypeDetailView(LoginRequiredMixin, generic.DetailView):
+    model = Dish_type
+    template_name = "kitchen/dish_type_detail.html"
+    context_object_name = "dish_type"
+
 
 class DishTypeCreateView(LoginRequiredMixin, SuperuserRequiredMixin, generic.CreateView):
    model = Dish_type
@@ -177,16 +183,26 @@ class CookDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         cook = get_object_or_404(Cook.objects.prefetch_related("dishes"), pk=pk)
         form = CookUpdateForm(instance=cook) if request.user == cook else None
+        request.session["return_url"] = request.META.get("HTTP_REFERER", "/")
         return render(request, "kitchen/cook_detail.html", {"cook": cook, "form": form})
+
 
     def post(self, request, pk):
         cook = get_object_or_404(Cook.objects.prefetch_related("dishes"), pk=pk)
         if request.user != cook:
             return redirect("kitchen:cook-detail", pk=cook.pk)
+
         form = CookUpdateForm(request.POST, instance=cook)
+        next_url = request.POST.get("next", "")
+
         if form.is_valid():
             form.save()
-        return redirect("kitchen:cook-detail", pk=cook.pk)
+            messages.success(request, "Changes saved successfully!")
+            return redirect(f"{reverse('kitchen:cook-detail', args=[cook.pk])}?next={next_url}")
+
+        return render(request, "kitchen/cook_detail.html", {"cook": cook, "form": form})
+
+
 
 
 class CookCreateView(LoginRequiredMixin,SuperuserRequiredMixin, generic.CreateView):

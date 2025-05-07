@@ -39,7 +39,11 @@
         <tbody>
           {% for dish_type in dish_type_list %}
           <tr>
-            <td>{{ dish_type.name }}</td>
+            <td>
+              <a href="{% url 'kitchen:dish-type-detail' dish_type.id %}" class="text-decoration-none text-dark fw-semibold">
+                {{ dish_type.name }}
+              </a>
+            </td>            
             {% if user.is_superuser %}
               <td>
                 <div class="d-flex gap-2">

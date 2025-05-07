@@ -64,7 +64,9 @@
                         </form>
                     {% endif %}
                     {% for cook in dish.cooks.all %}
-                        {{ cook.username }}{% if not forloop.last %}, {% endif %}
+                      <a href="{% url 'kitchen:cook-detail' cook.id %}" class="text-decoration-none text-dark fw-semibold">
+                        {{ cook.username }}
+                      </a>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 {% else %}
                   {% if not user.is_superuser %}

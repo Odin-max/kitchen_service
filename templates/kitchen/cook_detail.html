@@ -3,12 +3,27 @@
 
 {% block content %}
 <div class="container mt-7">
+  <div class="d-flex justify-content-end mb-4">
+    <a href="{{ request.GET.next|default:request.META.HTTP_REFERER|default:'#' }}" class="btn btn-outline-primary rounded-pill">
+      <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+  </div>
+
   <h2 class="mb-4 text-center">{{ cook.username|upper }}</h2>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
 
   <div class="card p-4 shadow border-0 mx-auto" style="max-width: 600px;">
     {% if user == cook %}
     <form method="post" id="profile-form">
       {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.META.HTTP_REFERER }}">
       {{ form.non_field_errors }}
       <div class="mb-3">
         {{ form.username.label_tag }} {{ form.username }}
