@@ -1,18 +1,12 @@
-import os
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+from .base import *
 
 DEBUG = False
 
 ALLOWED_HOSTS = []
+
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+   ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 DATABASES = {
     'default': {
@@ -21,19 +15,11 @@ DATABASES = {
         'USER': os.environ["POSTGRES_USER"],
         'PASSWORD': os.environ["POSTGRES_PASSWORD"],
         'HOST': os.environ["POSTGRES_HOST"],
-        'PORT': os.environ.get("POSTGRES_DB_PORT", "5432"),
+        'PORT': int(os.environ["POSTGRES_DB_PORT"]),
         'OPTIONS': {
-            'sslmode': 'require',
+           'sslmode': 'require',
         },
     }
 }
 
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
-USE_I18N = True
-USE_TZ = True
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-print("STATIC_ROOT:", STATIC_ROOT)
-print("BASE_DIR:", BASE_DIR)
+STATIC_ROOT = BASE_DIR / "staticfiles"

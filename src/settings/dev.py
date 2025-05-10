@@ -1,5 +1,4 @@
 from .base import *
-from str2bool import str2bool
 
 DEBUG = True
 ALLOWED_HOSTS = ["127.0.0.1"]
