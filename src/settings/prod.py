@@ -1,20 +1,18 @@
-from pathlib import Path
 import os
-from .base import *
-
-DEBUG = False
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-STATICFILES_DIRS = [BASE_DIR / "static"]
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
+DEBUG = False
 
 ALLOWED_HOSTS = []
-
-RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DATABASES = {
     'default': {
@@ -29,3 +27,9 @@ DATABASES = {
         },
     }
 }
+
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
