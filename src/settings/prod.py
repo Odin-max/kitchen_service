@@ -22,4 +22,5 @@ DATABASES = {
     }
 }
 
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+STATIC_ROOT = BASE_DIR / "staticfiles"
