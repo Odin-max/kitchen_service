@@ -33,3 +33,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+print("STATIC_ROOT:", STATIC_ROOT)
+print("BASE_DIR:", BASE_DIR)
