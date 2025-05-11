@@ -103,3 +103,12 @@ poetry run python manage.py test
 
 ---
 
+## ✅ Project link
+
+https://kitchen-service-m5u6.onrender.com/
+
+
+## To login as admin user use:
+  Login: Max
+  
+  Password: 2001november24
